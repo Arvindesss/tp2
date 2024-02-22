@@ -27,9 +27,10 @@ public class BTreeTest {
     public void testWithBigSequence(){
         //Given a sequence of numbers
         //When we create insert these numbers in a BTree
-        BTree btree = new BTree(10,15, 20, 27, 35, 40, 45, 37, 20, 50, 55, 46, 71, 66, 74, 85, 90, 75, 78, 95, 25, 81,68,60,65);
+        BTree btree = new BTree(10,15, 30, 27, 35, 40, 45, 37, 20, 50, 55, 46, 71, 66, 74, 85, 90, 79, 78, 95, 25, 81,68,60,65);
 
         //Then we expect these results
+        assertEquals(btree.getRoot().getParent(),null);
         System.out.println("OK");
     }
 

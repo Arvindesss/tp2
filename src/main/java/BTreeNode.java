@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class BTreeNode {
-    private static int M = 3;
+    private static int M = 5;
     private static int MAX_SIZE = M - 1;
     private List<Integer> keys;
 
@@ -70,6 +70,9 @@ public class BTreeNode {
     }
 
     public boolean insertKey(int key){
+        if(key == 79) {
+            System.out.println("ok");
+        }
         // an unsuccessful search gets us to the node Q1 where we have to insert the key
         BTreeNode q1 = searchNodeToInsert(key);
 
@@ -81,14 +84,14 @@ public class BTreeNode {
         }
         // else if Q1 is full, we split Q1 in two nodes: Q1 and Q2
         // Q1 gets the first half of the m keys, Q2 the second half
-        int i = Collections.binarySearch(q1.keys, key);
-        if (i < 0) {
-            i = -i - 1;
-        }
+        int i = getNewKeyIndex(key, q1);
         q1.keys.add(i,key);
+
         List<Integer> firstHalf = q1.keys.subList(0, (int) (Math.ceil(q1.keys.size()) / 2));
         List<Integer> secondHalf = q1.keys.subList((int) (Math.ceil(q1.keys.size()) / 2) + 1, q1.keys.size());
+
         int middleNumber = q1.keys.get((int) (Math.ceil(q1.keys.size()) / 2));
+
         q1.setKeys(new ArrayList<>(firstHalf));
         BTreeNode q2 = new BTreeNode(new ArrayList<>(secondHalf));
         // the median key + the Q2 pointer gets inserted in the father of Q1, repeating the previous operation up to the root
@@ -97,6 +100,7 @@ public class BTreeNode {
 
         // todo: gerer le cas ou q est plein, on doit changer q1 et q2
         if(q.keys.size() >= MAX_SIZE) {
+            q.insertKey(key);
             handleFullParentCase(key, q);
         }
 
@@ -116,14 +120,13 @@ public class BTreeNode {
         return false;
     }
 
+
+
     private void handleFullParentCase(int key,BTreeNode q1) {
         while(q1.keys.size() >= MAX_SIZE && q1.parent != null){
             q1 = q1.parent;
         }
-        int i = Collections.binarySearch(q1.keys, key);
-        if (i < 0) {
-            i = -i - 1;
-        }
+        int i = getNewKeyIndex(key, q1);
         q1.keys.add(i, key);
         List<List<Integer>> splittedKeys = splitKeys(q1);
         List<Integer> firstHalf = splittedKeys.get(0);
@@ -170,6 +173,14 @@ public class BTreeNode {
 
         //An empty node should be removed
         return false;
+    }
+
+    private int getNewKeyIndex(int key, BTreeNode q1) {
+        int i = Collections.binarySearch(q1.keys, key);
+        if (i < 0) {
+            i = -i - 1;
+        }
+        return i;
     }
 
     public List<List<Integer>> splitKeys(BTreeNode q1){
