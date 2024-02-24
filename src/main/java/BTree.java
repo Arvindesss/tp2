@@ -27,12 +27,12 @@ public class BTree {
             return node;
         }
         if (key < node.getKeys().get(0)) {
-            return node.getChild().isEmpty() ? node : searchNodeToInsert(key,node.getChild().get(0));
+            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChild().get(0));
         }
 
         int m = node.getKeys().size() - 1;
         if (key > node.getKeys().get(m)) {
-            return node.getChild().isEmpty() ? node : searchNodeToInsert(key,node.getChild().get(m + 1));
+            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChild().get(m + 1));
         }
 
         //todo: a optimiser probablement pour ne pas balayer toute la liste
@@ -41,7 +41,7 @@ public class BTree {
                 throw new RuntimeException("Duplicate keys are not allowed");
             }
             if(key > node.getKeys().get(i) && key < node.getKeys().get(i + 1)){
-                return node.getChild().isEmpty() ? node : searchNodeToInsert(key,node.getChild().get(i + 1));
+                return node.isLeaf() ? node : searchNodeToInsert(key,node.getChild().get(i + 1));
             }
         }
         return node;
@@ -51,66 +51,70 @@ public class BTree {
         // an unsuccessful search gets us to the node Q1 where we have to insert the key
         BTreeNode q1 = searchNodeToInsert(key,this.getRoot());
 
-        // if there is space in Q1, then we insert the key in Q1, the operation terminates
-        if(q1.getKeys().size() < MAX_SIZE){
-            insertKey(key,q1);
+        // if there is space in Q1, then we insert the key in Q1, and the operation terminates
+        insertKey(key,q1);
+        if(q1.getKeys().size() <= MAX_SIZE){
             return true;
         }
-        // else if Q1 is full, we split Q1 in two nodes: Q1 and Q2
+        // else if Q1 was already full, we split Q1 in two nodes: Q1 and Q2
         // Q1 gets the first half of the m keys, Q2 the second half
-        insertKey(key,q1);
-
         List<Integer> firstHalf = q1.getKeys().subList(0, (int) (Math.ceil(q1.getKeys().size()) / 2));
         List<Integer> secondHalf = q1.getKeys().subList((int) (Math.ceil(q1.getKeys().size()) / 2) + 1, q1.getKeys().size());
-
         int middleNumber = q1.getKeys().get((int) (Math.ceil(q1.getKeys().size()) / 2));
-
         q1.setKeys(new ArrayList<>(firstHalf));
         BTreeNode q2 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf));
         // the median key + the Q2 pointer gets inserted in the father of Q1, repeating the previous operation up to the root
-
+        //insertKeyInNode(middleNumber,q);
         BTreeNode q = q1.getParent() == null ? new BTreeNode(this.MAX_SIZE + 1) : q1.getParent();
-
-        // todo: gerer le cas ou q est plein, on doit changer q1 et q2
-        if(q.getKeys().size() >= MAX_SIZE) {
-            while(q.getKeys().size() >= MAX_SIZE && q1.getParent() != null){
-                insertKey(middleNumber,q);
-                List<Integer> firstHalf2 = q.getKeys().subList(0, (int) (Math.ceil(q.getKeys().size()) / 2));
-                List<Integer> secondHalf2 = q.getKeys().subList((int) (Math.ceil(q.getKeys().size()) / 2) + 1, q.getKeys().size());
-                BTreeNode q11 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(firstHalf2));
-                q11.setChild(new ArrayList<>(q.getChild().subList(0,(int) (Math.ceil(q.getChild().size()) / 2) + 1)));
-                BTreeNode q22 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf2));
-                q22.setChild(new ArrayList<>(q.getChild().subList((int) (Math.ceil(q.getChild().size()) / 2) + 1,q.getChild().size())));
-                middleNumber = q.getKeys().get((int) (Math.ceil(q.getKeys().size()) / 2));
-                q = q.getParent() == null ? new BTreeNode(this.MAX_SIZE + 1) : q.getParent();// remplacer q ou utliser une nouvelle variable ?
-                this.root = new BTreeNode(MAX_SIZE + 1);
-                if(root.getChild().isEmpty()) {
-                    root.getChild().add(q11);
-                    q11.setParent(root);
-                }
-                root.getChild().add(q22);
-                q22.setParent(root);
-                q22.getChild().add(q2);
-            }
-            insertKey(middleNumber, root);
-        } else {
-            insertKey(middleNumber, q);
-            if(q.getChild().isEmpty()) {
+        insertKey(middleNumber, q);
+        if(q.getKeys().size() <= MAX_SIZE){
+            if(q.isLeaf()) {
                 q.getChild().add(q1);
                 q1.setParent(q);
             }
             q.getChild().add(q2);
             q2.setParent(q);
-        }
+        } else {
+            List<Integer> firstHalf2 = q.getKeys().subList(0, (int) (Math.ceil(q.getKeys().size()) / 2));
+            List<Integer> secondHalf2 = q.getKeys().subList((int) (Math.ceil(q.getKeys().size()) / 2) + 1, q.getKeys().size());
+            BTreeNode q11 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(firstHalf2));
+            q11.setChild(new ArrayList<>(q.getChild().subList(0,(int) (Math.ceil(q.getChild().size()) / 2) + 1)));
+            BTreeNode q22 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf2));
+            q22.setChild(new ArrayList<>(q.getChild().subList((int) (Math.ceil(q.getChild().size()) / 2) + 1,q.getChild().size())));
+            middleNumber = q.getKeys().get((int) (Math.ceil(q.getKeys().size()) / 2));
 
+            q = q.getParent() == null ? new BTreeNode(this.MAX_SIZE + 1) : q.getParent();
+            this.root = new BTreeNode(MAX_SIZE + 1);
+            insertKey(middleNumber, root);
+            if(root.isLeaf()) {
+                root.getChild().add(q11);
+                q11.setParent(root);
+            }
+            root.getChild().add(q22);
+            q22.setParent(root);
+            q22.getChild().add(q2);
+        }
+        return true;
         //Alternatively, we can apply a rotation technique if the adjacent brother of Q1 is not full (see later)
-        return false;
     }
 
     public void insertKey(int key, BTreeNode node){
         int i = getNewKeyIndex(key, node);
         node.getKeys().add(i, key);
         node.getKeys().sort(Comparator.naturalOrder());
+    }
+
+    public boolean insertKeyInNode(int key, BTreeNode q1){
+        insertKey(key,q1);
+        if(q1.getKeys().size() <= MAX_SIZE){
+            return true;
+        }
+        List<Integer> firstHalf = q1.getKeys().subList(0, (int) (Math.ceil(q1.getKeys().size()) / 2));
+        List<Integer> secondHalf = q1.getKeys().subList((int) (Math.ceil(q1.getKeys().size()) / 2) + 1, q1.getKeys().size());
+        int middleNumber = q1.getKeys().get((int) (Math.ceil(q1.getKeys().size()) / 2));
+        q1.setKeys(new ArrayList<>(firstHalf));
+        BTreeNode q2 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf));
+        return false;
     }
 
     private int getNewKeyIndex(int key, BTreeNode q1) {
@@ -130,6 +134,7 @@ public class BTree {
     public BTreeNode getRoot() {
         return root;
     }
+
 
     public void setRoot(BTreeNode root) {
         this.root = root;

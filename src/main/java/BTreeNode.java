@@ -108,4 +108,8 @@ public class BTreeNode {
     public List<Integer> getKeys() {
         return keys;
     }
+
+    public boolean isLeaf(){
+        return this.child.isEmpty();
+    }
 }
