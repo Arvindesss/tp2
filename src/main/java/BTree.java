@@ -41,7 +41,7 @@ public class BTree {
                 throw new RuntimeException("Duplicate keys are not allowed");
             }
             if(key > node.getKeys().get(i) && key < node.getKeys().get(i + 1)){
-                return node.getChild().isEmpty() ? node : searchNodeToInsert(key,node.getChild().get(i));
+                return node.getChild().isEmpty() ? node : searchNodeToInsert(key,node.getChild().get(i + 1));
             }
         }
         return node;
@@ -73,35 +73,32 @@ public class BTree {
 
         // todo: gerer le cas ou q est plein, on doit changer q1 et q2
         if(q.getKeys().size() >= MAX_SIZE) {
-
             while(q.getKeys().size() >= MAX_SIZE && q1.getParent() != null){
                 insertKey(middleNumber,q);
                 List<Integer> firstHalf2 = q.getKeys().subList(0, (int) (Math.ceil(q.getKeys().size()) / 2));
                 List<Integer> secondHalf2 = q.getKeys().subList((int) (Math.ceil(q.getKeys().size()) / 2) + 1, q.getKeys().size());
                 BTreeNode q11 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(firstHalf2));
-                q11.setChild(q.getChild().subList(0,(int) (Math.ceil(q.getChild().size()) / 2)));
+                q11.setChild(new ArrayList<>(q.getChild().subList(0,(int) (Math.ceil(q.getChild().size()) / 2) + 1)));
                 BTreeNode q22 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf2));
-                q22.setChild(q.getChild().subList((int) (Math.ceil(q.getChild().size()) / 2),q.getChild().size()));
+                q22.setChild(new ArrayList<>(q.getChild().subList((int) (Math.ceil(q.getChild().size()) / 2) + 1,q.getChild().size())));
                 middleNumber = q.getKeys().get((int) (Math.ceil(q.getKeys().size()) / 2));
                 q = q.getParent() == null ? new BTreeNode(this.MAX_SIZE + 1) : q.getParent();// remplacer q ou utliser une nouvelle variable ?
-                if(q.getChild().isEmpty()) {
-                    q.getChild().add(q11);
-                    q11.setParent(q);
+                this.root = new BTreeNode(MAX_SIZE + 1);
+                if(root.getChild().isEmpty()) {
+                    root.getChild().add(q11);
+                    q11.setParent(root);
                 }
-                q.getChild().add(q22);
-
-                q22.setParent(q);
-                q22.getChild().add(q1);
+                root.getChild().add(q22);
+                q22.setParent(root);
                 q22.getChild().add(q2);
             }
-            insertKey(middleNumber, q);
+            insertKey(middleNumber, root);
         } else {
             insertKey(middleNumber, q);
             if(q.getChild().isEmpty()) {
                 q.getChild().add(q1);
                 q1.setParent(q);
             }
-
             q.getChild().add(q2);
             q2.setParent(q);
         }
