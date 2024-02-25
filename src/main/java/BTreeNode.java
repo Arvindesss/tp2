@@ -4,51 +4,19 @@ public class BTreeNode {
 
     private List<Integer> keys;
 
-    private List<BTreeNode> child;
+    private List<BTreeNode> children;
 
     private BTreeNode parent;
 
-    private final int MAX_SIZE;
-
-    public BTreeNode(int m){
-        this.MAX_SIZE = m - 1;
-        this.keys = new ArrayList<>();;
-        this.child = new ArrayList<>();
+    public BTreeNode(){
+        this.keys = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
-    public BTreeNode(int m, List<Integer> keys){
-        this.MAX_SIZE = m - 1;
+    public BTreeNode(List<Integer> keys){
         this.keys = keys;
-        this.child = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
-
-    public boolean searchKey(int key){
-        if(this.keys.isEmpty()){
-            return false;
-        }
-        if (key < this.keys.get(0)) {
-            return this.child.isEmpty() ? false : this.child.get(0).searchKey(key);
-        }
-
-        int m = this.keys.size() - 1;
-        if (key > this.keys.get(m)) {
-            return this.child.isEmpty() ? false : this.child.get(m+1).searchKey(key);
-        }
-
-        //todo: a optimiser probablement pour ne pas balayer toute la liste
-        for (int i = 0; i < this.keys.size(); i++) {
-            if(this.keys.get(i) == key){
-                return true;
-            }
-            if(key > this.keys.get(i) && key < this.keys.get(i + 1)){
-                return this.child.isEmpty() ? false : this.child.get(i).searchKey(key);
-            }
-        }
-        return false;
-    }
-
-
-
 
     public boolean deleteKey(int key) {
 
@@ -73,18 +41,6 @@ public class BTreeNode {
         return false;
     }
 
-
-
-    public List<List<Integer>> splitKeys(BTreeNode q1){
-        List<Integer> firstHalf = q1.keys.subList(0, (int) (Math.ceil(q1.keys.size()) / 2));
-        List<Integer> secondHalf = q1.keys.subList((int) (Math.ceil(q1.keys.size()) / 2) + 1, q1.keys.size());
-        return List.of(firstHalf,secondHalf);
-    }
-
-    public int getMedianKey(BTreeNode q1){
-        return  q1.keys.get((int) (Math.ceil(q1.keys.size()) / 2));
-    }
-
     public void setKeys(List<Integer> keys) {
         this.keys = keys;
     }
@@ -93,16 +49,16 @@ public class BTreeNode {
         this.parent = parent;
     }
 
-    public void setChild(List<BTreeNode> child) {
-        this.child = child;
+    public void setChildren(List<BTreeNode> children) {
+        this.children = children;
     }
 
     public BTreeNode getParent() {
         return parent;
     }
 
-    public List<BTreeNode> getChild() {
-        return child;
+    public List<BTreeNode> getChildren() {
+        return children;
     }
 
     public List<Integer> getKeys() {
@@ -110,6 +66,6 @@ public class BTreeNode {
     }
 
     public boolean isLeaf(){
-        return this.child.isEmpty();
+        return this.children.isEmpty();
     }
 }

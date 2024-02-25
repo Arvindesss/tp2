@@ -10,7 +10,7 @@ public class BTree {
 
     public BTree(int m, Integer... keys){
         this.MAX_SIZE = m - 1;
-        this.root = new BTreeNode(m);
+        this.root = new BTreeNode();
         for (Integer key: keys) {
             while (root.getParent() != null){
                 this.root = root.getParent();
@@ -22,17 +22,46 @@ public class BTree {
             root = root.getParent();
         }
     }
+
+    public boolean searchKey(int key){
+        return searchKeyInNode(key, this.root);
+    }
+
+    public boolean searchKeyInNode(int key, BTreeNode node){
+        if(node.getKeys().isEmpty()){
+            return false;
+        }
+        if (key < node.getKeys().get(0)) {
+            return node.isLeaf() ? false : searchKeyInNode(key, node.getChildren().get(0));
+        }
+
+        int m = node.getKeys().size() - 1;
+        if (key > node.getKeys().get(m)) {
+            return node.isLeaf() ? false : searchKeyInNode(key, node.getChildren().get(m + 1));
+        }
+
+        //todo: a optimiser probablement pour ne pas balayer toute la liste
+        for (int i = 0; i < node.getKeys().size(); i++) {
+            if(node.getKeys().get(i) == key){
+                return true;
+            }
+            if(key > node.getKeys().get(i) && key < node.getKeys().get(i + 1)){
+                return node.isLeaf() ? false : searchKeyInNode(key, node.getChildren().get(i + 1));
+            }
+        }
+        return false;
+    }
     public BTreeNode searchNodeToInsert(int key, BTreeNode node){
         if(node.getKeys().isEmpty()){
             return node;
         }
         if (key < node.getKeys().get(0)) {
-            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChild().get(0));
+            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChildren().get(0));
         }
 
         int m = node.getKeys().size() - 1;
         if (key > node.getKeys().get(m)) {
-            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChild().get(m + 1));
+            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChildren().get(m + 1));
         }
 
         //todo: a optimiser probablement pour ne pas balayer toute la liste
@@ -41,60 +70,15 @@ public class BTree {
                 throw new RuntimeException("Duplicate keys are not allowed");
             }
             if(key > node.getKeys().get(i) && key < node.getKeys().get(i + 1)){
-                return node.isLeaf() ? node : searchNodeToInsert(key,node.getChild().get(i + 1));
+                return node.isLeaf() ? node : searchNodeToInsert(key,node.getChildren().get(i + 1));
             }
         }
         return node;
     }
-
     public boolean insertKey(int key){
         // an unsuccessful search gets us to the node Q1 where we have to insert the key
         BTreeNode q1 = searchNodeToInsert(key,this.getRoot());
-
-        // if there is space in Q1, then we insert the key in Q1, and the operation terminates
-        insertKey(key,q1);
-        if(q1.getKeys().size() <= MAX_SIZE){
-            return true;
-        }
-        // else if Q1 was already full, we split Q1 in two nodes: Q1 and Q2
-        // Q1 gets the first half of the m keys, Q2 the second half
-        List<Integer> firstHalf = q1.getKeys().subList(0, (int) (Math.ceil(q1.getKeys().size()) / 2));
-        List<Integer> secondHalf = q1.getKeys().subList((int) (Math.ceil(q1.getKeys().size()) / 2) + 1, q1.getKeys().size());
-        int middleNumber = q1.getKeys().get((int) (Math.ceil(q1.getKeys().size()) / 2));
-        q1.setKeys(new ArrayList<>(firstHalf));
-        BTreeNode q2 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf));
-        // the median key + the Q2 pointer gets inserted in the father of Q1, repeating the previous operation up to the root
-        //insertKeyInNode(middleNumber,q);
-        BTreeNode q = q1.getParent() == null ? new BTreeNode(this.MAX_SIZE + 1) : q1.getParent();
-        insertKey(middleNumber, q);
-        if(q.getKeys().size() <= MAX_SIZE){
-            if(q.isLeaf()) {
-                q.getChild().add(q1);
-                q1.setParent(q);
-            }
-            q.getChild().add(q2);
-            q2.setParent(q);
-        } else {
-            List<Integer> firstHalf2 = q.getKeys().subList(0, (int) (Math.ceil(q.getKeys().size()) / 2));
-            List<Integer> secondHalf2 = q.getKeys().subList((int) (Math.ceil(q.getKeys().size()) / 2) + 1, q.getKeys().size());
-            BTreeNode q11 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(firstHalf2));
-            q11.setChild(new ArrayList<>(q.getChild().subList(0,(int) (Math.ceil(q.getChild().size()) / 2) + 1)));
-            BTreeNode q22 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf2));
-            q22.setChild(new ArrayList<>(q.getChild().subList((int) (Math.ceil(q.getChild().size()) / 2) + 1,q.getChild().size())));
-            middleNumber = q.getKeys().get((int) (Math.ceil(q.getKeys().size()) / 2));
-
-            q = q.getParent() == null ? new BTreeNode(this.MAX_SIZE + 1) : q.getParent();
-            this.root = new BTreeNode(MAX_SIZE + 1);
-            insertKey(middleNumber, root);
-            if(root.isLeaf()) {
-                root.getChild().add(q11);
-                q11.setParent(root);
-            }
-            root.getChild().add(q22);
-            q22.setParent(root);
-            q22.getChild().add(q2);
-        }
-        return true;
+        return insertKeyInNode(key,q1);
         //Alternatively, we can apply a rotation technique if the adjacent brother of Q1 is not full (see later)
     }
 
@@ -106,14 +90,32 @@ public class BTree {
 
     public boolean insertKeyInNode(int key, BTreeNode q1){
         insertKey(key,q1);
+        // if there is space in Q1, then we insert the key in Q1, and the operation terminates
         if(q1.getKeys().size() <= MAX_SIZE){
             return true;
         }
+        // else if Q1 was already full, we split Q1 in two nodes: Q1 and Q2
+        // Q1 gets the first half of the m keys, Q2 the second half
         List<Integer> firstHalf = q1.getKeys().subList(0, (int) (Math.ceil(q1.getKeys().size()) / 2));
         List<Integer> secondHalf = q1.getKeys().subList((int) (Math.ceil(q1.getKeys().size()) / 2) + 1, q1.getKeys().size());
-        int middleNumber = q1.getKeys().get((int) (Math.ceil(q1.getKeys().size()) / 2));
+        int middleNumber = q1.getKeys().get((int) (Math.ceil(q1.getKeys().size()) / 2)); // the median key is calculated from q1 before splitting
         q1.setKeys(new ArrayList<>(firstHalf));
-        BTreeNode q2 = new BTreeNode(this.MAX_SIZE + 1, new ArrayList<>(secondHalf));
+        BTreeNode q2 = new BTreeNode(new ArrayList<>(secondHalf));
+        // Sets the children of old Q1 to newly splitted q1 and q2
+        if(!q1.isLeaf()) {
+            q2.setChildren(new ArrayList<>(q1.getChildren().subList((int) (Math.ceil(q1.getChildren().size()) / 2), q1.getChildren().size())));
+            q1.setChildren(new ArrayList<>(q1.getChildren().subList(0, (int) (Math.ceil(q1.getChildren().size()) / 2) + 1)));
+        }
+        // the Q2 pointer gets inserted in the father of Q1, repeating the previous operation up to the root if necessary
+        BTreeNode q = q1.getParent() == null ? new BTreeNode() : q1.getParent();
+        if(q.isLeaf()) {
+            this.root = q;
+            root.getChildren().add(q1);
+            q1.setParent(root);
+        }
+        q.getChildren().add(q2);
+        q2.setParent(q);
+        insertKeyInNode(middleNumber,q);
         return false;
     }
 
@@ -125,18 +127,7 @@ public class BTree {
         return i;
     }
 
-    public List<List<Integer>> splitKeys(BTreeNode q1){
-        List<Integer> firstHalf = q1.getKeys().subList(0, (int) (Math.ceil(q1.getKeys().size()) / 2));
-        List<Integer> secondHalf = q1.getKeys().subList((int) (Math.ceil(q1.getKeys().size()) / 2) + 1, q1.getKeys().size());
-        return List.of(firstHalf,secondHalf);
-    }
-
     public BTreeNode getRoot() {
         return root;
-    }
-
-
-    public void setRoot(BTreeNode root) {
-        this.root = root;
     }
 }
