@@ -17,10 +17,6 @@ public class BTree {
             }
             insertKey(key);
         }
-        //Maj de la racine
-        while (root.getParent() != null){
-            root = root.getParent();
-        }
     }
 
     public boolean searchKey(int key){
@@ -104,7 +100,13 @@ public class BTree {
         // Sets the children of old Q1 to newly splitted q1 and q2
         if(!q1.isLeaf()) {
             q2.setChildren(new ArrayList<>(q1.getChildren().subList((int) (Math.ceil(q1.getChildren().size()) / 2), q1.getChildren().size())));
+            for (BTreeNode b:q2.getChildren()) {
+                b.setParent(q2);
+            }
             q1.setChildren(new ArrayList<>(q1.getChildren().subList(0, (int) (Math.ceil(q1.getChildren().size()) / 2) + 1)));
+            for (BTreeNode b:q1.getChildren()) {
+                b.setParent(q1);
+            }
         }
         // the Q2 pointer gets inserted in the father of Q1, repeating the previous operation up to the root if necessary
         BTreeNode q = q1.getParent() == null ? new BTreeNode() : q1.getParent();
