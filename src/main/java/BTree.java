@@ -15,6 +15,9 @@ public class BTree {
             while (root.getParent() != null){
                 this.root = root.getParent();
             }
+            if(key == 13) {
+                System.out.println();
+            }
             insertKey(key);
         }
     }
@@ -115,7 +118,8 @@ public class BTree {
             root.getChildren().add(q1);
             q1.setParent(root);
         }
-        q.getChildren().add(q2);
+        int i = getNewKeyIndex(middleNumber,q) + 1;
+        q.getChildren().add(i,q2);
         q2.setParent(q);
         insertKeyInNode(middleNumber,q);
         return false;

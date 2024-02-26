@@ -18,6 +18,48 @@ public class BTreeTest {
     }
 
     @Test
+    public void testSearchWith(){
+        // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
+        BTree btree = new BTree(3,7,2,3,1,5,4);
+        // When we search these numbers in the BTree
+        assertTrue(btree.searchKey(7));
+        assertTrue(btree.searchKey(2));
+        assertTrue(btree.searchKey(3));
+        assertTrue(btree.searchKey(1));
+        assertTrue(btree.searchKey(5));
+        assertTrue(btree.searchKey(4));
+    }
+
+    @Test
+    public void testSearchWith1to17(){
+        // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
+        BTree btree = new BTree(3,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
+        // When we search these numbers in the BTree
+        for (int i = 1; i <= 17; i++) {
+            //Then we expect to find all keys
+            assertTrue(btree.searchKey(i));
+        }
+    }
+
+    @Test
+    public void testSearchWithGreatNumberFirst(){
+        // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
+        BTree btree = new BTree(3,70,72, 74,76, 78, 1,2,3);
+        // When we search these numbers in the BTree
+        assertTrue(btree.searchKey(70));
+        assertTrue(btree.searchKey(72));
+        assertTrue(btree.searchKey(74));
+        assertTrue(btree.searchKey(76));
+        assertTrue(btree.searchKey(78));
+
+        for (int i = 1; i <= 3; i++) {
+            System.out.println(i);
+            //Then we expect to find all keys
+            assertTrue(btree.searchKey(i));
+        }
+    }
+
+    @Test
     public void testSearchWith12345AndWrongKeys(){
         // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
         BTree btree = new BTree(3,1,2,3,4,5);
