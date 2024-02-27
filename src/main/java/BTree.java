@@ -92,9 +92,10 @@ public class BTree {
         }
         // else if Q1 was already full, we split Q1 in two nodes: Q1 and Q2
         // Q1 gets the first half of the m keys, Q2 the second half
-        List<Integer> firstHalf = q1.getKeys().subList(0, (int) (Math.ceil(q1.getKeys().size()) / 2));
-        List<Integer> secondHalf = q1.getKeys().subList((int) (Math.ceil(q1.getKeys().size()) / 2) + 1, q1.getKeys().size());
-        int middleNumber = q1.getKeys().get((int) (Math.ceil(q1.getKeys().size()) / 2)); // the median key is calculated from q1 before splitting
+        int middleNumberIndex = ((MAX_SIZE + 1) / 2 + (((MAX_SIZE + 1) % 2 == 0) ? 0 : 1)) - 1;
+        List<Integer> firstHalf = q1.getKeys().subList(0, middleNumberIndex);
+        List<Integer> secondHalf = q1.getKeys().subList((middleNumberIndex + 1), q1.getKeys().size());
+        int middleNumber = q1.getKeys().get(middleNumberIndex); // the median key is calculated from q1 before splitting
         q1.setKeys(new ArrayList<>(firstHalf));
         BTreeNode q2 = new BTreeNode(new ArrayList<>(secondHalf));
         // Sets the children of old Q1 to newly splitted q1 and q2

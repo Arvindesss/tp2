@@ -40,15 +40,25 @@ public class BTreeTest {
     }
 
     @Test
-    public void testSearchWith1to17(){
+    public void testSearchWith1to20(){
         // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
-        BTree btree = new BTree(3,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
+        BTree btree = new BTree(4,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
         // When we search these numbers in the BTree
-        for (int i = 1; i <= 17; i++) {
+        for (int i = 1; i <= 20; i++) {
             //Then we expect to find all keys
             assertTrue(btree.searchKey(i));
         }
     }
+
+
+    @Test
+    public void testSearchWithEvenTreeOrder(){
+        // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
+        BTree btree = new BTree(4,46,1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 97, 99, 2, 4, 6, 8, 10, 12, 14, 16);
+        // When we search these numbers in the BTree
+        assertTrue(btree.searchKey(46));
+    }
+
 
     @Test
     public void testSearchWithGreatNumberFirst(){
