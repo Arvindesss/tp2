@@ -15,9 +15,6 @@ public class BTree {
             while (root.getParent() != null){
                 this.root = root.getParent();
             }
-            if(key == 13) {
-                System.out.println();
-            }
             insertKey(key);
         }
     }
@@ -106,7 +103,7 @@ public class BTree {
             for (BTreeNode b:q2.getChildren()) {
                 b.setParent(q2);
             }
-            q1.setChildren(new ArrayList<>(q1.getChildren().subList(0, (int) (Math.ceil(q1.getChildren().size()) / 2) + 1)));
+            q1.setChildren(new ArrayList<>(q1.getChildren().subList(0, (int) (Math.ceil(q1.getChildren().size()) / 2))));
             for (BTreeNode b:q1.getChildren()) {
                 b.setParent(q1);
             }
