@@ -18,11 +18,11 @@ public class BTreeTest {
     }
 
     @Test
-    public void testSearchWith12345AndWrongKeys(){
-        // Given a BTree with a sequence of numbers 1,2,3,4,5 and m = 3
-        BTree btree = new BTree(3,1,2,3,4,5);
-        // When we search keys between 6 and 100
-        for (int i = 6; i <= 100; i++) {
+    public void testSearchWithWrongKeys(){
+        // Given a BTree with a sequence of numbers with odd numbers up to 99 and m = 3
+        BTree btree = new BTree(3,1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 97, 99);
+        // When we search even keys up to 100
+        for (int i = 2; i <= 100; i = i + 2) {
             // Then we expect to not find any keys
             assertFalse(btree.searchKey(i));
         }
@@ -86,8 +86,6 @@ public class BTreeTest {
         BTree btree = new BTree(5,10,15,30,27,35,40,45,37,20,50,55,46,71,66,74,85,90,79,78,95,25,81,68,60,65);
         // Then we expect these results
         assertNull(btree.getRoot().getParent());
-        //todo: préferer la méthode anyOf plutot que contains pour vérifier qu'un noeud a seulement les clés que
-        // l'on cherche et pas d'autres clés
         assertTrue(btree.getRoot().getKeys().contains(46));
         assertTrue(btree.getRoot().getChildren().get(0).getKeys().containsAll(List.of(27,37)));
         assertTrue(btree.getRoot().getChildren().get(1).getKeys().containsAll(List.of(66,79)));

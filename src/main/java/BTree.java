@@ -32,7 +32,7 @@ public class BTree {
      * @param node
      * @return a boolean value to check if the key is present
      */
-    public boolean searchKeyInNode(int key, BTreeNode node){
+    private boolean searchKeyInNode(int key, BTreeNode node){
         if(node.getKeys().isEmpty()){
             return false;
         }
@@ -40,12 +40,11 @@ public class BTree {
             return node.isLeaf() ? false : searchKeyInNode(key, node.getChildren().get(0));
         }
 
-        int m = node.getKeys().size() - 1;
-        if (key > node.getKeys().get(m)) {
-            return node.isLeaf() ? false : searchKeyInNode(key, node.getChildren().get(m + 1));
+        int lastKeyIndex = node.getKeys().size() - 1;
+        if (key > node.getKeys().get(lastKeyIndex)) {
+            return node.isLeaf() ? false : searchKeyInNode(key, node.getChildren().get(lastKeyIndex + 1));
         }
 
-        //todo: a optimiser probablement pour ne pas balayer toute la liste
         for (int i = 0; i < node.getKeys().size(); i++) {
             if(node.getKeys().get(i) == key){
                 return true;
@@ -63,7 +62,7 @@ public class BTree {
      * @param node
      * @return the node where we can insert a key
      */
-    public BTreeNode searchNodeToInsert(int key, BTreeNode node){
+    private BTreeNode searchNodeToInsert(int key, BTreeNode node){
         if(node.getKeys().isEmpty()){
             return node;
         }
@@ -71,12 +70,11 @@ public class BTree {
             return node.isLeaf() ? node : searchNodeToInsert(key,node.getChildren().get(0));
         }
 
-        int m = node.getKeys().size() - 1;
-        if (key > node.getKeys().get(m)) {
-            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChildren().get(m + 1));
+        int lastKeyIndex = node.getKeys().size() - 1;
+        if (key > node.getKeys().get(lastKeyIndex)) {
+            return node.isLeaf() ? node : searchNodeToInsert(key,node.getChildren().get(lastKeyIndex + 1));
         }
 
-        //todo: a optimiser probablement pour ne pas balayer toute la liste
         for (int i = 0; i < node.getKeys().size(); i++) {
             if(node.getKeys().get(i) == key){
                 throw new RuntimeException("Duplicate keys are not allowed");
@@ -104,7 +102,7 @@ public class BTree {
      * @param key
      * @param q1
      */
-    public void insertKeyInNode(int key, BTreeNode q1){
+    private void insertKeyInNode(int key, BTreeNode q1){
         q1.insertKey(key);
         // if there is space in Q1, then we insert the key in Q1, and the operation terminates
         if(q1.getKeys().size() <= maxSize){
@@ -112,7 +110,7 @@ public class BTree {
         }
         // else if Q1 was already full, we split Q1 in two nodes: Q1 and Q2
         // Q1 gets the first half of the m keys, Q2 the second half
-        int middleNumberIndex = ((maxSize + 1) / 2 + (((maxSize + 1) % 2 == 0) ? 0 : 1)) - 1;
+        int middleNumberIndex = ((maxSize + 1) / 2 + (((maxSize + 1) % 2 == 0) ? 0 : 1)) - 1; // équivaut à entier_superieur(m/2) - 1
         List<Integer> firstHalf = q1.getKeys().subList(0, middleNumberIndex);
         List<Integer> secondHalf = q1.getKeys().subList((middleNumberIndex + 1), q1.getKeys().size());
         int middleNumber = q1.getKeys().get(middleNumberIndex); // the median key is calculated from q1 before splitting
