@@ -129,7 +129,7 @@ public class BTree {
         }
         // the Q2 pointer gets inserted in the father of Q1, repeating the previous operation up to the root if necessary
         BTreeNode q = q1.getParent() == null ? new BTreeNode() : q1.getParent();
-        if(q.isLeaf()) {
+        if(q.getChildren().isEmpty()) {
             this.root = q;
             root.getChildren().add(q1);
             q1.setParent(root);
