@@ -40,7 +40,7 @@ public class BTreeTest {
     }
 
     @Test
-    public void testSearchWith1to20(){
+    public void testSearchWithEvenM(){
         // Given a BTree with a sequence of numbers 1 to 20 and m = 4
         BTree btree = new BTree(4,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);
         // When we search these numbers in the BTree
