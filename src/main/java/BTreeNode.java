@@ -18,27 +18,27 @@ public class BTreeNode {
         this.children = new ArrayList<>();
     }
 
-    public boolean deleteKey(int key) {
+    /**
+     * Inserts a Key in a node
+     * @param key
+     */
+    public void insertKey(int key){
+        int i = getNewKeyIndex(key);
+        this.getKeys().add(i, key);
+        this.getKeys().sort(Comparator.naturalOrder());
+    }
 
-        //Search the key
-
-        // If the key is to be deleted is not a leaf,
-            // Replace with the largest value contained in the left subtree of the key
-            // Delete the largest value in the left subtree
-
-
-        // If it is a leaf
-            // If after the deletion the leaf node p has less than ceil(m/2) - 1, regroup with adjacent brother =>
-                // Use merge with adj brother
-                // If merge is not possible, use rotation :
-                    // Remove the key,
-                    // If the node becomes underfull, get one key from parent, parent gets one key from adj brother node
-                    //
-
-
-
-        //An empty node should be removed
-        return false;
+    /**
+     * Finds the index where we can insert a key
+     * @param key
+     * @return the index
+     */
+    public int getNewKeyIndex(int key) {
+        int i = Collections.binarySearch(this.getKeys(), key);
+        if (i < 0) {
+            i = -i - 1;
+        }
+        return i;
     }
 
     public void setKeys(List<Integer> keys) {
